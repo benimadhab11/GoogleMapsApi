@@ -1,0 +1,403 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv='X-UA-Compatible' content='IE=edge' />
+<title>SAPUI5 and Google Maps</title>
+<script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+<style>
+  #right-panel {
+    font-family: 'Roboto','sans-serif';
+    line-height: 30px;
+    padding-left: 10px;
+  }
+
+  #right-panel select, #right-panel input {
+    font-size: 15px;
+  }
+
+  #right-panel select {
+    width: 100%;
+  }
+
+  #right-panel i {
+    font-size: 12px;
+  }
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  #map {
+    height: 60%;
+    float: left;
+    width: 50%;
+    margin:20px;
+  }
+  #right-panel {
+    margin: 10px;
+    width: 20%;
+    float: left;
+    text-align: left;
+  }
+  #directions-panel {
+
+    background-color: #FFEE77;
+    float:left;
+  }
+</style>
+<script id='sap-ui-bootstrap' type='text/javascript'
+	src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+	data-sap-ui-theme="sap_platinum"
+	data-sap-ui-libs='sap.ui.commons,sap.ui.ux3,sap.ui.ux3,sap.ui.commons,sap.ui.table'></script>
+  <script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC6ONSTCXXmq7q66ZW6rwK4cEX9XsNvXfI&callback=initMap">
+  </script>
+
+
+
+</head>
+
+<body class="sapUiBody">
+  <div id="map"></div>
+  <div id='content' style="margin-top:20px;margin-left:20px;width:700px;height:500px;float:left;"></div>
+
+  <div id="right-panel">
+
+  <div id="directions-panel"></div>
+  </div>
+
+  <div id="content1" style="float:left;width:40%;margin-top:0;margin-left:100px;margin-bottom:20px;"></div>
+
+  <script type="text/javascript">
+
+
+
+
+
+
+
+
+
+
+	var layout = new sap.ui.commons.layout.MatrixLayout('layout');
+	layout.setWidth('100%');
+
+
+	var loginPannel = new sap.ui.commons.Panel('loginPannel');
+	var sTitle = new sap.ui.commons.Title('sTitle');
+	sTitle.setText('Distance Calculation');
+	loginPannel.setTitle(sTitle);
+
+
+							var sLayout = new sap.ui.commons.layout.MatrixLayout('sLayout');
+	            sLayout.setWidth('100%');
+
+					var label = new sap.ui.commons.Label( { text : "Distance From" } );
+						var text = new sap.ui.commons.TextField({
+							id: 'fromInput',
+							value : '',
+							tooltip : 'Change the Text',
+							width : '200px'
+						})
+
+					var label1 = new sap.ui.commons.Label({ text : "Distanceto" });
+        	var text1 = new sap.ui.commons.TextField({
+						id: 'toInput',
+						value : '',
+						tooltip : 'Change the Text',
+						width : '200px'
+					})
+
+					var label3 = new sap.ui.commons.Label( { text : "Via" } );
+					var text3 = new sap.ui.commons.TextField({
+						id: 'inpd',
+						value : '',
+						tooltip : 'Change the Text',
+						width : '200px'
+					})
+
+
+
+					var EmployeesCounter = 0;
+
+					var oButton = new sap.ui.commons.Button({text:"Add Route",
+	press:function(){
+    initMap();
+	}
+	});
+	var oDElButton = new sap.ui.commons.Button({text:"Delete route",
+	press:function(){
+
+	mdData.Employees.splice(0,1);
+	oModel.setData(mdData);
+	alert("Data deleted successfully");
+	}
+
+	});
+
+
+var odata = {
+		root:{
+
+
+		}
+};
+					sLayout.createRow(label, text);
+					sLayout.createRow(label1, text1);
+					sLayout.createRow(label3, text3);
+
+          var viabutton = new sap.ui.commons.Button({text:"Add via",
+          press:function(){
+            var i = sap.ui.getCore().byId('inpd').getValue();
+            var oCB = new sap.ui.commons.CheckBox({
+                text:i,
+                id:"check"+i,
+                name:"check",
+                tooltip : 'Newsletter checkbox',
+                checked : false,
+           });
+           sLayout.createRow(oCB);
+          }
+          });
+          sLayout.createRow(viabutton);
+					sLayout.createRow(oButton);
+				  sLayout.createRow(oDElButton);
+
+					loginPannel.addContent(sLayout);
+
+					layout.createRow(loginPannel);
+					layout.placeAt('content');
+
+
+
+          							var oModel = new sap.ui.model.json.JSONModel();
+          							oModel.setData(odata);
+          							sap.ui.getCore().setModel(oModel);
+
+
+
+                        var m=0;
+
+
+          							var oTable = new sap.ui.table.TreeTable({
+                          title : "Routes",
+                          width : "100%",
+                          visibleRowCount : 9,
+                          columns: [
+		new sap.ui.table.Column({label: "From", template: "from"}),
+		new sap.ui.table.Column({label: "To", template: "to"})
+	],
+
+                          selectionMode: sap.ui.table.SelectionMode.Single,
+                          enableColumnReordering: true,
+                          expandFirstLevel: true,
+                          toggleOpenState: function(oEvent) {
+                            var iRowIndex = oEvent.getParameter("rowIndex");
+                            var oRowContext = oEvent.getParameter("rowContext");
+                            var bExpanded = oEvent.getParameter("expanded");
+                            m = Math.max(m,iRowIndex);
+                            console.log(m);
+}
+          							});
+
+
+                        function test1(value){
+                          if($( "input:checked" ).length>0){
+                             for(var i=1;i<= $( "input:checked" ).length*2;i++){
+                               if(document.getElementById('inp-col3-row'+i).value==='')
+                               return true;
+                               else return false;
+                             }
+                             }
+                        }
+
+                      function test2(value){
+                        if($( "input:checked" ).length>0){
+
+                             if(document.getElementById('inp-col3-row0').value==='')
+                             return true;
+                             else
+                             return false;
+
+                           }
+                      }
+
+          							oTable.addColumn(new sap.ui.table.ColumnHeader({
+          										label: new sap.ui.commons.Label({text: "Distance"}),
+          										template: new sap.ui.commons.TextField({value:"{distance}"})
+          							}));
+
+          							oTable.addColumn(new sap.ui.table.ColumnHeader({
+          										label: new sap.ui.commons.Label({text: "Carrier Input"}),
+          										template:    new sap.ui.commons.TextField({
+                                	id: 'inp',
+                                	value : '{inpd}',
+                                	tooltip : 'Change the Text',
+                                	width : '10em',
+                                  liveChange: function(){
+                                      if(!test1(this.getValue()) && !test2(this.getValue()))
+                                          this.setValueState(sap.ui.core.ValueState.Error);
+                                      else
+                                          this.setValueState(sap.ui.core.ValueState.Success);
+                                  }
+                                  })
+                                    }));
+
+
+
+
+
+
+
+
+          							oTable.placeAt("content");
+
+
+                        var oBtn = new sap.ui.commons.Button({text: "Toggle",
+                        	press: function() {
+                        		var iSelectedIndex = oTable.getSelectedIndex();
+                        		if (iSelectedIndex > -1) {
+                        			if (oTable.isExpanded(iSelectedIndex)) {
+                        				oTable.collapse(iSelectedIndex);
+                        			} else {
+                        				oTable.expand(iSelectedIndex);
+                        			}
+                        		}
+                        	}
+                        });
+                        oTable.setToolbar(new sap.ui.commons.Toolbar({items: [oBtn]}));
+
+            oTable.bindRows("/root");
+
+
+
+
+                function initMap() {
+                  var directionsService = new google.maps.DirectionsService;
+                  var directionsDisplay = new google.maps.DirectionsRenderer;
+                  var map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 5,
+                    center: {lat: 20.5937, lng: 78.9629}
+                  });
+                  directionsDisplay.setMap(map);
+                  calculateAndDisplayRoute(directionsService, directionsDisplay);
+
+
+                }
+                var count=0;
+                function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+                  var waypts = [];
+                  var checkboxArray = document.getElementById('waypoints');
+                   $("input:checked").each(function() {
+                  waypts.push({
+                  location:  $(this).next("label").text().split(' ').join('%20'),
+                  stopover: true
+                  });
+                  });
+                  console.log(waypts);
+                  directionsService.route({
+                    origin: document.getElementById('fromInput').value,
+                    destination: document.getElementById('toInput').value,
+                    waypoints: waypts,
+                    optimizeWaypoints: true,
+                    travelMode: google.maps.TravelMode.DRIVING
+                  }, function(response, status) {
+
+                    if (status === google.maps.DirectionsStatus.OK) {
+                      directionsDisplay.setDirections(response);
+                      var route = response.routes[0];
+                    //  var summaryPanel = document.getElementById('directions-panel');
+                    //  summaryPanel.innerHTML = '';
+                      // For each route, display summary information.
+                      var td=0;
+
+                      var f = sap.ui.getCore().byId('fromInput').getValue();
+                      var t = sap.ui.getCore().byId('toInput').getValue();
+                      var i = sap.ui.getCore().byId('inpd').getValue();
+                      var cval = $("input:checked").map(function() {
+                        return $(this).next("label").text().split(' ').join('%20');
+                        }).get();
+
+                      var tmp="";
+                      for (var i = 0; i < route.legs.length; i++) {
+                        console.log(route.legs.length);
+
+
+
+                        var routeSegment = i + 1;
+                    //    summaryPanel.innerHTML += '<div> <b>Route Segment: ' + routeSegment +        '</b><br>';
+                      //  summaryPanel.innerHTML += route.legs[i].start_address + ' to ';
+                      //  summaryPanel.innerHTML += route.legs[i].end_address + '<br>';
+                      //  summaryPanel.innerHTML += route.legs[i].distance.text + '<br>';
+
+                        var  str1 = route.legs[i].distance.text.replace ( /[^\d.]/g, '' );
+                        td += parseInt(str1)
+                      //  summaryPanel.innerHTML += "Total Distance : "+td+'km <br><br> </div>';
+                        console.log(td);
+                        var j;
+                        for(j=0;j<EmployeesCounter;j++){
+                          console.log("loopj"+j);
+                          console.log("loope"+EmployeesCounter);
+                          if(EmployeesCounter>0 && !jQuery.isEmptyObject(odata.root[j]) && odata.root[j]["from"]==f && odata.root[j]["to"]==t){
+                            odata.root[j]["distance"]=td;
+                            odata.root[j][count]={};
+
+                            if(!jQuery.isEmptyObject(odata.root[j]["distance"]))
+                            odata.root[j]["distance"]=td;
+
+                            odata.root[j][count]["from"]= route.legs[i].start_address;
+                            odata.root[j][count]["to"]=route.legs[i].end_address;
+                            odata.root[j][count]["distance"]=route.legs[i].distance.text;
+                            j=0;
+                            count++;
+                            break;
+                        }
+
+
+                      }
+                  
+                      console.log("j"+j);
+                      console.log("e"+EmployeesCounter);
+                      if(j==EmployeesCounter){
+                        count=0;
+                        odata.root[EmployeesCounter]={};
+                        odata.root[EmployeesCounter]["from"]=f;
+                        odata.root[EmployeesCounter]["to"]=t;
+                        odata.root[EmployeesCounter]["distance"]=route.legs[i].distance.text;
+
+                        if($( "input:checked" ).length > 0){
+
+                          odata.root[EmployeesCounter][count]={};
+                          odata.root[EmployeesCounter][count]["from"]= route.legs[i].start_address;
+                          odata.root[EmployeesCounter][count]["to"]=route.legs[i].end_address;
+                          odata.root[EmployeesCounter][count]["distance"]=route.legs[i].distance.text;
+
+                          count++;
+                        }
+
+                      }
+
+
+
+
+                                              EmployeesCounter++;
+                                              oModel.setData(odata);
+                                              //alert("Data added successfully");
+                      }
+                    } else {
+                      window.alert('Directions request failed due to ' + status);
+                    }
+                  });
+
+
+                }
+
+
+
+
+
+
+</script>
+</body>
+</html>
