@@ -1,0 +1,126 @@
+<mvc:View
+		height="100%"
+		xmlns:l="sap.ui.layout"
+		xmlns:f="sap.ui.layout.form"
+		xmlns:core="sap.ui.core"
+		xmlns:mvc="sap.ui.core.mvc"
+		xmlns="sap.m"
+		controllerName="sap.m.sample.SemanticPage.Page"
+		xmlns:semantic="sap.m.semantic"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		xmlns:ui="sap.ca.ui"
+		displayBlock="true">
+
+	<SplitContainer>
+		<masterPages>
+			<semantic:MasterPage title="Carrier Lanes">
+
+					<Toolbar>
+						<SearchField
+							liveChange="onSearch"
+							width="100%" />
+					</Toolbar>
+
+
+
+
+
+
+			            <Table
+			                   mode="SingleSelectMaster" id="tab" items="{/root}"  itemPress="lol" >
+
+
+
+			                <columns>
+			                    <Column width="6em">
+			                        <Text text="From"/>
+			                    </Column>
+			                    <Column width="6em">
+			                        <Text text="To"/>
+			                    </Column>
+			                    <Column width="6em">
+			                        <Text text="Distance"/>
+			                    </Column>
+			                </columns>
+			                <items>
+			                    <ColumnListItem type="Active">
+			                        <cells >
+			                            <Text text="{from}"/>
+			                            <Text text="{to}"/>
+			                            <Text text="{distance}"/>
+			                        </cells>
+			                    </ColumnListItem>
+			                </items>
+			            </Table>
+
+				<semantic:sort>
+					<semantic:SortSelect change="onSemanticSelectChange"
+											items="{/root}">
+						<core:Item key="{from}" text="{from}" />
+						<core:Item key="{to}" text="{to}" />
+					</semantic:SortSelect>
+				</semantic:sort>
+
+
+
+
+			</semantic:MasterPage>
+		</masterPages>
+		<detailPages>
+
+
+			<semantic:DetailPage title="Locations">
+				<f:SimpleForm width="80%" height="100%">
+				<f:content>   <html:style>
+                 .combo {
+
+                                         color:white;
+                                         padding:4px;
+																				 float:right;
+																				 width:1000px;
+                                 }
+          </html:style>
+
+                                                <Label text="Origin Location" id="from" />
+                                                <Input id="origin" width="100%" showSuggestion="true" suggest="haha">
+                                                </Input>
+
+                                                <Label text="Destination Location" id="to" />
+                                                <Input id="dest"  width="100%">
+                                                </Input>
+
+                                                <Label text="Add Means of Transport" id="mode" />
+																								<ComboBox class="combo" selectionChange="handleSelectionChange" selectionFinish="handleSelectionFinish">
+
+																									<core:Item key="DRIVING" text="DRIVING" />
+																									<core:Item key="WALKING" text="	WALKING" />
+																									<core:Item key="BICYCLING" text="BICYCLING" />
+																									<core:Item key="TRANSIT" text="TRANSIT" />
+
+																								</ComboBox>
+
+
+                                                </f:content>
+
+                                    </f:SimpleForm>
+
+
+																		<html:div id="map"></html:div>
+
+				<semantic:positiveAction>
+					<semantic:PositiveAction text="Add Route" press="onSemanticButtonPress"/>
+				</semantic:positiveAction>
+				<semantic:negativeAction>
+					<semantic:NegativeAction text="Delete Route" press="onSemanticButtonPress"/>
+				</semantic:negativeAction>
+
+
+
+
+			</semantic:DetailPage>
+
+		</detailPages>
+
+	</SplitContainer>
+
+</mvc:View>
